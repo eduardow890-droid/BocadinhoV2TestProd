@@ -1,0 +1,129 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="robots" content="noindex, nofollow">
+  <meta name="theme-color" content="#5A2108">
+  <title>Administração | Bocadinho</title>
+  <link rel="icon" href="/brand-assets/admin-favicon.ico?v=1" sizes="16x16 32x32 48x48">
+  <link rel="icon" type="image/png" sizes="32x32" href="/brand-assets/admin-favicon-32.png?v=1">
+  <link rel="icon" type="image/png" sizes="16x16" href="/brand-assets/admin-favicon-16.png?v=1">
+  <link rel="apple-touch-icon" sizes="180x180" href="/brand-assets/admin-apple-touch-icon.png?v=1">
+  <link rel="manifest" href="/brand-assets/admin.webmanifest?v=1">
+  <link rel="stylesheet" href="/admin/admin.css">
+</head>
+<body>
+  <main class="shell">
+    <section id="login-view" class="panel login-panel" aria-labelledby="login-title">
+      <div class="brand-mark">B</div>
+      <p class="eyebrow">Bocadinho</p>
+      <h1 id="login-title">Área de pedidos</h1>
+      <p class="muted">Acesso restrito à equipe da loja.</p>
+      <form id="login-form" novalidate>
+        <label for="token">Token administrativo</label>
+        <input id="token" type="password" autocomplete="current-password" required>
+        <p id="login-error" class="message error" role="alert" hidden></p>
+        <button class="button primary" type="submit">Entrar</button>
+      </form>
+    </section>
+
+    <section id="app-view" hidden aria-labelledby="app-title">
+      <header class="topbar">
+        <div>
+          <p class="eyebrow">Bocadinho</p>
+          <h1 id="app-title">Pedidos</h1>
+        </div>
+        <div class="top-actions">
+          <button id="sound-button" class="button secondary" type="button" aria-pressed="false">Ativar som</button>
+          <button id="logout-button" class="button secondary" type="button">Sair</button>
+        </div>
+      </header>
+
+      <div id="notice" class="notice" role="status" aria-live="polite" hidden></div>
+
+      <div class="admin-tabs" role="tablist" aria-label="Seções do painel">
+        <button type="button" role="tab" id="tab-pedidos" aria-selected="true" aria-controls="view-pedidos">Pedidos e produtos</button>
+        <button type="button" role="tab" id="tab-clientes" aria-selected="false" aria-controls="view-clientes">Clientes cadastrados</button>
+      </div>
+
+      <div id="view-pedidos" role="tabpanel" aria-labelledby="tab-pedidos">
+      <section class="summary-grid" aria-label="Resumo dos pedidos">
+        <article class="summary-card"><span>Pagos</span><strong id="count-pago">0</strong></article>
+        <article class="summary-card"><span>Em preparo</span><strong id="count-em_preparo">0</strong></article>
+        <article class="summary-card"><span>Enviados</span><strong id="count-enviado">0</strong></article>
+        <article class="summary-card"><span>Pendentes</span><strong id="count-pendente">0</strong></article>
+        <article class="summary-card alert-card"><span>Revisar</span><strong id="count-revisar">0</strong></article>
+        <article class="summary-card total-card"><span>Pago hoje</span><strong id="paid-today">R$ 0,00</strong></article>
+      </section>
+
+      <section class="product-manager" aria-labelledby="products-title">
+        <div class="product-manager-heading">
+          <div><p class="eyebrow">Cardápio</p><h2 id="products-title">Produtos</h2><p class="muted">Cadastre doces, fotos e preços. Produtos desativados não aparecem para os clientes.</p></div>
+          <button id="new-product-button" class="button secondary" type="button">Adicionar doce</button>
+        </div>
+        <form id="product-form" class="product-form" enctype="multipart/form-data" hidden>
+          <input id="product-id" type="hidden">
+          <label>Nome do doce<input id="product-name" name="nome" type="text" maxlength="80" required></label>
+          <label>Descrição (opcional)<textarea id="product-description" name="descricao" rows="2" maxlength="300"></textarea></label>
+          <label>Preço em reais<input id="product-price" name="preco" type="number" min="0.01" max="5000" step="0.01" inputmode="decimal" required></label>
+          <label class="product-sold-out-field"><input id="product-sold-out" name="esgotado" type="checkbox"> Marcar como esgotado (continua visível no cardápio)</label>
+          <label>Foto (JPEG, PNG ou WebP; até 5 MB)<input id="product-image" name="imagem" type="file" accept="image/jpeg,image/png,image/webp"></label>
+          <p id="product-image-help" class="product-help">Selecione uma imagem para o novo produto. Ao editar, deixe em branco para manter a foto atual.</p>
+          <div class="product-form-actions"><button id="save-product-button" class="button primary" type="submit">Salvar doce</button><button id="cancel-product-button" class="button secondary" type="button">Cancelar</button></div>
+          <p id="product-message" class="message" role="status" aria-live="polite" hidden></p>
+        </form>
+        <p id="products-loading" class="empty">Carregando produtos…</p>
+        <div id="product-list" class="product-list" aria-live="polite"></div>
+      </section>
+
+      <section class="toolbar" aria-label="Filtros de pedidos">
+        <label class="filter-label" for="status-filter">Status
+          <select id="status-filter">
+            <option value="pago">Pagos</option>
+            <option value="em_preparo">Em preparo</option>
+            <option value="enviado">Enviados</option>
+            <option value="pendente">Pendentes</option>
+            <option value="revisar">Revisar</option>
+            <option value="estornado">Estornados</option>
+            <option value="concluido">Concluídos</option>
+            <option value="">Todos</option>
+          </select>
+        </label>
+        <label class="search-label" for="search">Buscar por nome ou telefone
+          <input id="search" type="search" autocomplete="off" placeholder="Digite para filtrar">
+        </label>
+        <button id="refresh-button" class="button secondary" type="button">Atualizar</button>
+      </section>
+
+      <p id="connection-message" class="message" role="status" aria-live="polite" hidden></p>
+      <section id="orders" class="orders" aria-live="polite" aria-busy="false"></section>
+      </div>
+
+      <div id="view-clientes" role="tabpanel" aria-labelledby="tab-clientes" hidden>
+        <section class="summary-grid clientes-resumo" aria-label="Resumo dos clientes">
+          <article class="summary-card total-card"><span>Total de clientes</span><strong id="cli-total">0</strong></article>
+          <article class="summary-card"><span>Novos (7 dias)</span><strong id="cli-7d">0</strong></article>
+          <article class="summary-card"><span>Novos (30 dias)</span><strong id="cli-30d">0</strong></article>
+          <article class="summary-card"><span>Pedidos de clientes</span><strong id="cli-pedidos">0</strong></article>
+        </section>
+        <section class="toolbar" aria-label="Busca de clientes">
+          <label class="search-label" for="cli-busca">Buscar por nome, e-mail ou telefone
+            <input id="cli-busca" type="search" autocomplete="off" placeholder="Digite para buscar">
+          </label>
+          <button id="cli-atualizar" class="button secondary" type="button">Atualizar</button>
+        </section>
+        <p id="cli-msg" class="message" role="status" aria-live="polite" hidden></p>
+        <section id="cli-lista" class="clientes-lista" aria-live="polite"></section>
+        <nav class="cli-paginacao" aria-label="Paginação de clientes">
+          <button id="cli-anterior" class="button secondary" type="button">Anterior</button>
+          <span id="cli-pagina" class="muted"></span>
+          <button id="cli-proxima" class="button secondary" type="button">Próxima</button>
+        </nav>
+      </div>
+    </section>
+  </main>
+  <script src="/admin/admin.js" defer></script>
+  <script src="/admin/clientes.js" defer></script>
+</body>
+</html>

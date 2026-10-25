@@ -1,0 +1,36 @@
+/* Bocadinho — conta do cliente e cartão fidelidade (carregar depois de melhorias.css) */
+.conta{padding:36px 20px 44px;background:var(--pale);padding-inline:max(20px,calc((100% - 1200px)/2))}
+.conta .t,.conta .sub{max-width:760px;margin-inline:auto}
+.conta-box{max-width:760px;margin:0 auto}
+.conta-tabs{display:flex;gap:8px;margin:0 0 16px}
+.conta-tabs button{flex:1;min-height:48px;border:2px solid var(--brown);border-radius:12px;background:transparent;color:var(--brown);font:700 16px 'Outfit',Arial,sans-serif;cursor:pointer}
+.conta-tabs button[aria-selected=true]{background:var(--brown);color:var(--pale)}
+.conta .form{background:var(--cream);border-radius:16px;padding:8px 20px 20px}
+.conta .form input[type=password]{width:100%;border:2px solid transparent;border-radius:10px;padding:12px;font:16px Arial,sans-serif;background:var(--pale);color:#4A200C}
+.conta .form input[type=password]:focus{outline:none;border-color:var(--btn)}
+.conta .form input.is-invalid{border-color:var(--wine)!important}
+.conta .check{display:flex;gap:10px;align-items:flex-start;margin:14px 0 0;font-size:14px;font-weight:500}
+.conta .check input{width:20px;height:20px;margin-top:2px;flex:none}
+.conta .erro-conta{color:var(--wine);font-weight:700;min-height:1.4em;margin:12px 0 0}
+.conta .btn[disabled]{opacity:.6;cursor:wait}
+.conta-ola{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;margin:0 0 16px;color:#4A200C}
+.conta-ola b{font:700 22px 'Outfit',Arial,sans-serif}
+.btn-link{background:none;border:0;color:var(--wine);font:700 15px 'Outfit',Arial,sans-serif;text-decoration:underline;cursor:pointer;min-height:44px;padding:0 8px}
+.cartao{background:var(--brown);color:var(--pale);border-radius:20px;padding:22px 20px;box-shadow:0 10px 28px rgba(74,32,12,.22)}
+.cartao h3{margin:0 0 4px;font-size:24px}
+.cartao p{margin:0 0 14px;font-size:15px}
+.carimbos{display:grid;grid-template-columns:repeat(5,1fr);gap:10px;list-style:none;margin:0 0 14px;padding:0}
+.carimbos li{aspect-ratio:1;border-radius:50%;border:2px dashed rgba(250,249,228,.55);display:flex;align-items:center;justify-content:center;font-size:clamp(20px,5vw,30px);opacity:.9}
+.carimbos li.cheio{background:var(--green);border:2px solid var(--green);color:var(--btn)}
+.carimbos li.premio{border-style:solid;border-color:var(--pale);font-size:clamp(18px,4.5vw,26px)}
+.cartao-aviso{background:var(--green);color:var(--btn);border-radius:12px;padding:12px 14px;font-weight:700;margin:0}
+.cartao-aviso.vazio{background:rgba(250,249,228,.16);color:var(--pale);font-weight:500}
+.conta-pedidos{margin:20px 0 0;padding:0;list-style:none;color:#4A200C}
+.conta-pedidos li{display:flex;justify-content:space-between;gap:12px;padding:10px 0;border-bottom:1px solid #dfd5bb;font-size:15px}
+.conta-pedidos h4{margin:20px 0 4px;font-size:16px}
+.fid-banner{border-radius:12px;padding:12px 14px;margin:0 0 14px;font-size:15px;font-weight:700}
+.fid-banner.ganho{background:var(--green);color:var(--btn)}
+.fid-banner.convite{background:var(--pale);color:#4A200C;border:1px dashed var(--brown);font-weight:500}
+.fid-banner a{color:var(--wine)}
+.review-brinde{color:var(--btn);font-weight:700}
+@media(max-width:480px){.carimbos{gap:6px}}

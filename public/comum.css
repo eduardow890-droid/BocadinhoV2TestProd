@@ -1,0 +1,22 @@
+/* Bocadinho — menu, sidebar da conta e avisos compartilhados entre as páginas */
+body.pagina-interna{padding-top:calc(64px + env(safe-area-inset-top,0px));min-height:100vh}
+.site-nav .nav-conta{background:none;border:0;color:var(--pale);font-family:'Outfit',Arial,sans-serif;font-size:16px;font-weight:700;cursor:pointer;min-height:44px;padding:8px 12px;text-shadow:0 1px 5px rgba(0,0,0,.8)}
+.site-nav.is-stuck .nav-conta{text-shadow:none}
+.site-nav .nav-conta:hover{text-decoration:underline;text-underline-offset:4px}
+.site-nav [aria-current=page]{text-decoration:underline;text-underline-offset:6px}
+.site-nav .nav-aviso{background:var(--green);color:var(--btn);border-radius:999px;text-shadow:none;padding:6px 12px;min-height:36px;font-size:14px}
+.site-nav button:focus-visible{outline:3px solid var(--pale);outline-offset:2px}
+.drawer-fundo{position:fixed;inset:0;z-index:40;background:rgba(49,32,21,.5)}
+.drawer{position:fixed;z-index:41;top:0;right:0;bottom:0;width:min(380px,100%);background:var(--cream);color:#4A200C;box-shadow:-8px 0 28px rgba(0,0,0,.25);padding:calc(16px + env(safe-area-inset-top,0px)) 20px 20px;overflow-y:auto;display:flex;flex-direction:column;gap:14px;animation:drawer-in .22s ease-out}
+.drawer[hidden],.drawer-fundo[hidden]{display:none}
+@keyframes drawer-in{from{transform:translateX(100%)}to{transform:none}}
+@media(prefers-reduced-motion:reduce){.drawer{animation:none}}
+.drawer-topo{display:flex;justify-content:space-between;align-items:center}
+.drawer-topo h2{margin:0;font-size:24px}
+.drawer-fechar{width:44px;height:44px;border:0;border-radius:50%;background:var(--brown);color:var(--pale);font-size:26px;line-height:1;cursor:pointer}
+.drawer p{margin:0}
+.drawer .btn{font-size:16px;padding:14px 16px;border-radius:12px}
+.drawer .btn-sec{background:transparent;border:2px solid var(--brown);color:var(--brown)}
+.drawer-barra{height:12px;border-radius:999px;background:#e9dfc4;overflow:hidden}
+.drawer-barra i{display:block;height:100%;background:var(--green)}
+.drawer-brinde{background:var(--green);color:var(--btn);border-radius:12px;padding:10px 12px;font-weight:700}
