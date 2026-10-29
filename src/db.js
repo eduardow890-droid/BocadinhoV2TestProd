@@ -1,3 +1,4 @@
+const fs = require('fs');
 const { Pool } = require('pg');
 const cfg = require('./config');
 const produtos = require('./produtos');
@@ -6,21 +7,35 @@ if (!cfg.databaseUrl) throw new Error('DATABASE_URL ausente. Configure a conexã
 
 const databaseUrl = new URL(cfg.databaseUrl);
 const usarTls = cfg.producao || process.env.DB_SSL !== 'false';
+let ssl;
 if (usarTls) {
-  // sslmode=require criptografa, mas não valida o certificado/hostname do banco.
-  // Força a validação completa, mesmo que a URL do provedor use require.
-  databaseUrl.searchParams.set('sslmode', 'verify-full');
   const caPath = process.env.DB_SSL_CA?.trim();
   if (cfg.producao && !caPath) {
     throw new Error('DB_SSL_CA ausente. Configure o certificado raiz do PostgreSQL para validar a conexão em produção.');
   }
-  if (caPath) databaseUrl.searchParams.set('sslrootcert', caPath);
+  if (caPath) {
+    let ca;
+    try {
+      ca = fs.readFileSync(caPath, 'utf8');
+    } catch (e) {
+      throw new Error(`Não foi possível ler DB_SSL_CA em ${caPath}: ${e.message}`);
+    }
+    ssl = { ca, rejectUnauthorized: true };
+  } else {
+    // Fora de produção, preserve o comportamento compatível com bancos locais.
+    ssl = true;
+  }
+  // Evita que parâmetros SSL da URL sobrescrevam a configuração explícita acima.
+  databaseUrl.searchParams.delete('sslmode');
+  databaseUrl.searchParams.delete('sslrootcert');
 } else {
-  databaseUrl.searchParams.set('sslmode', 'disable');
+  databaseUrl.searchParams.delete('sslmode');
+  databaseUrl.searchParams.delete('sslrootcert');
 }
 
 const pool = new Pool({
   connectionString: databaseUrl.toString(),
+  ssl,
   max: Number(process.env.DB_POOL_MAX || 5),
   idleTimeoutMillis: 30000
 });
