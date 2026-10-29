@@ -1,4 +1,5 @@
 const fs = require('fs');
+const tls = require('tls');
 const { Pool } = require('pg');
 const cfg = require('./config');
 const produtos = require('./produtos');
@@ -20,7 +21,9 @@ if (usarTls) {
     } catch (e) {
       throw new Error(`Não foi possível ler DB_SSL_CA em ${caPath}: ${e.message}`);
     }
-    ssl = { ca, rejectUnauthorized: true };
+    // `ca` substitui a lista padrão do Node. Preserve também as CAs públicas
+    // para endpoints Supabase cuja cadeia usa uma autoridade pública.
+    ssl = { ca: [ca, ...tls.rootCertificates], rejectUnauthorized: true };
   } else {
     // Fora de produção, preserve o comportamento compatível com bancos locais.
     ssl = true;
