@@ -55,17 +55,23 @@ async function criarPix({ pedido, cliente, chaveIdempotencia = pedido.id }) {
     transactions: { payments: [pagamento] },
   }, chaveIdempotencia); // chave persistida antes da chamada; toda repetição recupera a mesma cobrança
 
-  const p = o.transactions?.payments?.[0];
-  const t = p?.payment_method;
-  if (!t?.qr_code) throw new Error('Resposta do Mercado Pago sem código Pix');
+  const p = o.transactions?.payments?.[0] || o.transaction?.payments?.[0];
+  const t = p?.payment_method || {};
+  const qr = t.qr_code || p?.qr_code || o.qr_code;
+  const qrBase64 = t.qr_code_base64 || p?.qr_code_base64 || o.qr_code_base64 || '';
+  if (!qr) {
+    const e = new Error('Resposta do Mercado Pago sem código Pix');
+    e.detalhe = { order_status: o.status, order_status_detail: o.status_detail, payment_status: p?.status, payment_status_detail: p?.status_detail };
+    throw e;
+  }
   return {
     mpId: p.id,
     mpOrderId: o.id,
     status: p.status || o.status || 'action_required',
     valorCentavos: pedido.total_centavos,
-    qr: t.qr_code,
+    qr,
     // No sandbox, qr_code_base64 pode vir vazio; o copia-e-cola continua válido.
-    qrBase64: t.qr_code_base64 || ''
+    qrBase64
   };
 }
 
