@@ -11,7 +11,7 @@ const CHAVE='bocadinho_pedido';
 const CHAVE_CARRINHO='bocadinho_carrinho',CHAVE_RASCUNHO='bocadinho_rascunho';
 const CAMPOS_RASCUNHO=['nome','telefone','email','rua','numero','complemento','regiao','cidade','obs'];
 const PRAZO_RASCUNHO_MS=7*24*60*60*1000;
-let totalExibido=0,frameTotal=0,pedidoAtual=null,timerPoll=0,timerRelogio=0;
+let totalExibido=0,frameTotal=0,pedidoAtual=null,timerPoll=0,timerRelogio=0,cardBrick=null,mpPublicKey='';
 let checkoutEtapa=1;
 
 function tokenAleatorio(){
@@ -279,7 +279,8 @@ function definirTipoEntrega(){
 async function enviarPedido(){
 	const btn=$('enviar');
 	btn.disabled=true;
-	btn.textContent='Gerando Pix...';
+	const metodoPagamento=document.querySelector('input[name="metodo-pagamento"]:checked')?.value||'pix';
+	btn.textContent=metodoPagamento==='cartao'?'Preparando cartão...':'Gerando Pix...';
 	let acesso=lerPedidoSalvo();
 	if(!acesso||acesso.id||acesso.legado)acesso={id:null,token:tokenAleatorio()};
 	salvarPedido(acesso);
@@ -288,6 +289,7 @@ async function enviarPedido(){
 			method:'POST',
 			headers:{'Content-Type':'application/json','x-order-access-token':acesso.token},
 			body:JSON.stringify({
+				metodoPagamento,
 				nome:v('nome'),email:v('email'),telefone:v('telefone'),
 				tipo:entrega()?'entrega':'retirada',regiao:v('regiao'),cidade:v('cidade'),
 				rua:v('rua'),numero:v('numero'),complemento:v('complemento'),
@@ -305,12 +307,13 @@ async function enviarPedido(){
 		}
 		acesso.id=d.id;
 		salvarPedido(acesso);
-		mostrarPix(d,acesso.token);
+		if(metodoPagamento==='cartao')mostrarCartao(d,acesso.token);
+		else mostrarPix(d,acesso.token);
 	}catch(e){
 		$('erro').textContent='Sem conexão. Seus dados de retomada foram preservados; tente novamente sem recarregar ou fechar a página.';
 	}finally{
 		btn.disabled=false;
-		btn.textContent='Confirmar e gerar Pix';
+		btn.textContent='Confirmar e pagar';
 	}
 }
 
@@ -357,6 +360,46 @@ document.querySelectorAll('input[name=tipo]').forEach(opcao=>opcao.addEventListe
 	$('data-error').textContent='';
 	definirTipoEntrega();
 }));
+
+async function inicializarCartao(d,tokenAcesso){
+	if(!window.MercadoPago)throw new Error('SDK do Mercado Pago não carregou.');
+	if(!mpPublicKey)throw new Error('A chave pública do Mercado Pago não está configurada.');
+	if(cardBrick?.unmount)await cardBrick.unmount();
+	const mp=new MercadoPago(mpPublicKey,{locale:'pt-BR'});
+	const bricks=mp.bricks();
+	cardBrick=await bricks.create('cardPayment','cardPaymentBrick_container',{
+		initialization:{amount:d.total_centavos/100},
+		callbacks:{
+			onReady:()=>{},
+			onSubmit:async(formData,additionalData)=>{
+				const r=await fetch('/api/pedidos/'+encodeURIComponent(d.id)+'/cartao',{
+					method:'POST',headers:{'Content-Type':'application/json','x-order-access-token':tokenAcesso},
+					body:JSON.stringify({...formData,payment_type_id:additionalData?.paymentTypeId||'credit_card'})
+				});
+				const resposta=await r.json().catch(()=>({}));
+				if(!r.ok)throw new Error(resposta.erro||'Não foi possível processar o cartão.');
+				mostrarStatusPagamento(resposta,tokenAcesso);
+			}
+		}
+	});
+}
+
+function mostrarCartao(d,tokenAcesso){
+	pedidoAtual={id:d.id,token:tokenAcesso||lerPedidoSalvo()?.token,fim:Date.now()+d.restante_ms};
+	$('dados').hidden=true;$('cart-summary').hidden=true;$('checkout-progress').hidden=true;
+	$('pix').hidden=true;$('cartao-pagamento').hidden=false;
+	$('pix-status').textContent='Aguardando pagamento';
+	$('pix-status-detail').textContent='Preencha os dados do cartão abaixo.';
+	inicializarCartao(d,tokenAcesso).catch(e=>{$('erro').textContent=e.message;});
+	$('cartao-pagamento').scrollIntoView({behavior:reduzirMovimento?'auto':'smooth',block:'center'});
+}
+
+function mostrarStatusPagamento(d,tokenAcesso){
+	$('cartao-pagamento').hidden=true;
+	$('pix').hidden=false;
+	$('pix-corpo').hidden=true;
+	mostrarPix(d,tokenAcesso);
+}
 
 /* ---------- painel do Pix ---------- */
 function exibirDadosPix(d){
@@ -514,6 +557,8 @@ $('pix-novo').addEventListener('click',()=>{
 	render();
 	$('pedido').scrollIntoView({behavior:reduzirMovimento?'auto':'smooth'});
 });
+
+fetch('/api/config').then(r=>r.json()).then(d=>{mpPublicKey=d.mpPublicKey||''}).catch(()=>{});
 
 async function retomarPedido(){
 	const salvo=lerPedidoSalvo();

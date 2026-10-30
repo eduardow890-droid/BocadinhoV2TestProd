@@ -1,6 +1,6 @@
 # Bocadinho: pedidos com Pix (confirmação automática)
 
-Backend Node/Express + PostgreSQL integrado ao **Mercado Pago (Pix)**, com o site da Bocadinho adaptado.
+Backend Node/Express + PostgreSQL integrado ao **Mercado Pago (Pix e cartão)**, com o site da Bocadinho adaptado.
 O pagamento usa a **Orders API**, que permite validar o fluxo de Pix no ambiente de testes.
 
 ## Estrutura
@@ -161,7 +161,7 @@ Execute `npm test` para rodar os testes unitários do formato/hash do token e da
 ## Limitações conhecidas
 
 - **Taxa de entrega:** este projeto cobra só os produtos. O cliente paga o Uber Envios diretamente, da loja até a casa dele; o valor e o prazo são combinados pelo WhatsApp. Para cobrar tudo no Pix, defina taxa fixa por região em `src/pedidos.js`.
-- Cartão não está incluído (só Pix).
+- Cartão de crédito e débito usam o Checkout Transparente/Card Payment Brick; teste recusas, aprovações, pendências, parcelas e estornos antes da operação.
 - Não há testes integrados automatizados contra PostgreSQL, Mercado Pago ou Telegram; execute um teste completo no sandbox antes de divulgar e um Pix real de baixo valor antes da operação.
 # Bocadinho
 # BocadinhoV2TestProd

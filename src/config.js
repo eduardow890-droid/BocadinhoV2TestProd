@@ -14,6 +14,7 @@ module.exports = {
   producao: process.env.NODE_ENV === 'production',
   baseUrl: exigir('BASE_URL').replace(/\/$/, ''),
   mpToken: exigir('MP_ACCESS_TOKEN'),
+  mpPublicKey: process.env.MP_PUBLIC_KEY || '',
   mpSegredo: exigir('MP_WEBHOOK_SECRET'),
   adminToken: exigir('ADMIN_TOKEN'),
   pagamentoSimulado: process.env.PAGAMENTO_SIMULADO === 'true' && process.env.NODE_ENV !== 'production',

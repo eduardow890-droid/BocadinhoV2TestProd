@@ -69,6 +69,33 @@ async function criarPix({ pedido, cliente, chaveIdempotencia = pedido.id }) {
   };
 }
 
+/** Cria e processa uma order de cartão com o token gerado pelo MercadoPago.js. */
+async function criarCartao({ pedido, cliente, dados, chaveIdempotencia }) {
+  const tipo = dados.payment_type_id === 'debit_card' ? 'debit_card' : 'credit_card';
+  const amount = (pedido.total_centavos / 100).toFixed(2);
+  return chamar('POST', '/v1/orders', {
+    type: 'online',
+    processing_mode: 'automatic',
+    total_amount: amount,
+    external_reference: pedido.id,
+    payer: {
+      email: cliente.email,
+      identification: dados.payer?.identification
+    },
+    transactions: {
+      payments: [{
+        amount,
+        payment_method: {
+          id: dados.payment_method_id,
+          type: tipo,
+          token: dados.token,
+          installments: Number(dados.installments) || 1
+        }
+      }]
+    }
+  }, chaveIdempotencia);
+}
+
 const consultarOrder = id => chamar('GET', `/v1/orders/${encodeURIComponent(id)}`);
 // Orders API cancela por POST /cancel e exige chave de idempotência.
 const cancelarOrder = id => chamar(
@@ -114,4 +141,4 @@ function assinaturaValida(req) {
   return a.length === b.length && crypto.timingSafeEqual(a, b);
 }
 
-module.exports = { criarPix, consultarOrder, cancelarOrder, consultar, cancelar, assinaturaValida };
+module.exports = { criarPix, criarCartao, consultarOrder, cancelarOrder, consultar, cancelar, assinaturaValida };

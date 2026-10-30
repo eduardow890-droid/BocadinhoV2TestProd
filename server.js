@@ -20,6 +20,9 @@ app.use(helmet({
     useDefaults: true,
     directives: {
       'img-src': ["'self'", 'data:', ...(origemImagensProdutos ? [origemImagensProdutos] : [])],
+      'script-src': ["'self'", 'https://sdk.mercadopago.com'],
+      'frame-src': ["'self'", 'https://*.mercadopago.com.br'],
+      'connect-src': ["'self'", 'https://api.mercadopago.com'],
       // em desenvolvimento (http://localhost) não forçamos https
       'upgrade-insecure-requests': cfg.producao ? [] : null
     }

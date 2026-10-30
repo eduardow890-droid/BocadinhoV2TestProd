@@ -43,7 +43,10 @@ async function processarPagamento(referencia) {
   const valor = Number(p.amount);
   const metodo = p.payment_method?.id || p.payment_method_id;
   const valorOk = Number.isFinite(valor) && Math.round(valor * 100) === pedido.total_centavos;
-  if (metodo !== 'pix' || !valorOk) {
+  const tipoMetodo = p.payment_method?.type || '';
+  const metodoValido = (metodo === 'pix' && tipoMetodo === 'bank_transfer') ||
+    ['credit_card', 'debit_card'].includes(tipoMetodo);
+  if (!metodoValido || !valorOk) {
     console.error(`[pagamento] valor ou método divergente para pedido ${pedido.id.slice(0, 8)}; encaminhado para revisão.`);
     await svc.mudarStatus(pedido.id, ['pendente'], 'revisar');
     return;

@@ -7,6 +7,7 @@ const texto = (min, max, msg) =>
     .pipe(z.string().min(min, msg).max(max, msg));
 
 const criarPedidoSchema = z.object({
+  metodoPagamento: z.enum(['pix', 'cartao']).default('pix'),
   nome: texto(2, 80, 'Informe seu nome (2 a 80 caracteres).'),
 
   email: z.string({ required_error: 'Informe seu e-mail.' })

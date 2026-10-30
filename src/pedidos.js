@@ -90,7 +90,8 @@ async function visaoPublica(pedido) {
   const out = { id: pedido.id, status: pedido.status, total_centavos: pedido.total_centavos, restante_ms: Math.max(0, Number(pedido.expira_em) - Date.now()), brinde_fidelidade: Boolean(pedido.brinde_fidelidade) };
   if (pedido.status === 'pendente') {
     const pg = await obterPagamento(pedido.id);
-    if (pg) out.pix = { copiaECola: pg.qr_code, qrBase64: pg.qr_base64 };
+    if (pg?.qr_code) out.pix = { copiaECola: pg.qr_code, qrBase64: pg.qr_base64 };
+    else if (pg) out.metodo_pagamento = pg.metodo_pagamento || 'cartao';
     else out.pix_em_processamento = true;
   }
   return out;

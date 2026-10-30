@@ -19,11 +19,11 @@
 <link rel="stylesheet" href="comum.css?v=1"></head><body class="pagina-interna">
 <nav class="site-nav is-stuck" aria-label="Navegação principal"><a href="/">Início</a><a href="/cardapio.html" aria-current="page" data-nav-cardapio>Cardápio</a><button type="button" class="nav-conta" data-abrir-conta aria-haspopup="dialog" aria-controls="drawer-conta">Minha conta</button><a href="https://wa.me/5521985929831" target="_blank" rel="noopener">WhatsApp</a></nav>
 <main>
-<section class="pedido" id="pedido"><h2 class="t">Monte seu pedido</h2><p class="sub">Escolha seus doces, informe como receber e revise antes de gerar o Pix.</p>
+<section class="pedido" id="pedido"><h2 class="t">Monte seu pedido</h2><p class="sub">Escolha seus doces, informe como receber e pague com Pix ou cartão.</p>
 <ol class="checkout-progress" id="checkout-progress" aria-label="Etapas do pedido">
 <li class="is-current" data-checkout-progress="1" aria-current="step"><span>1</span><b>Escolha os produtos</b></li>
 <li data-checkout-progress="2"><span>2</span><b>Seus dados</b></li>
-<li data-checkout-progress="3"><span>3</span><b>Revise e gere o Pix</b></li>
+<li data-checkout-progress="3"><span>3</span><b>Revise e pague</b></li>
 </ol>
 <details class="cart-summary" id="cart-summary" open><summary><span><b>Resumo do pedido</b><span id="cart-summary-count">0 itens</span></span><strong id="cart-summary-total">R$ 0,00</strong></summary><div class="resumo" id="resumo" role="status" aria-live="polite" aria-atomic="true"></div></details>
 <div class="fid-banner convite" id="fid-checkout" hidden></div>
@@ -54,11 +54,11 @@
 </section>
 
 <section class="checkout-step" id="checkout-step-3" aria-labelledby="checkout-title-3" hidden>
-<h3 id="checkout-title-3">3. Revise seu pedido</h3><p class="step-hint">Confira os itens, o recebimento e seus dados antes de gerar o Pix.</p>
+<h3 id="checkout-title-3">3. Revise seu pedido</h3><p class="step-hint">Confira os itens, o recebimento e escolha como pagar.</p>
 <div id="order-review" class="order-review"></div>
-<div class="review-delivery-note" id="review-delivery-note"><b>Entrega:</b> o valor do Uber Envios é pago separadamente pelo cliente. Valor e prazo são combinados pelo WhatsApp conforme o endereço.</div>
+<div class="review-delivery-note" id="review-delivery-note"><b>Entrega:</b> o valor do Uber Envios é pago separadamente pelo cliente. Valor e prazo são combinados pelo WhatsApp conforme o endereço.</div><fieldset class="payment-choice"><legend>Forma de pagamento *</legend><div class="radios"><label><input type="radio" name="metodo-pagamento" value="pix" checked> Pix</label><label><input type="radio" name="metodo-pagamento" value="cartao"> Cartão de crédito ou débito</label></div></fieldset>
 <div class="erro" id="erro" role="alert" aria-live="assertive"></div>
-<div class="step-actions step-actions-split"><button type="button" class="btn secondary-step" id="back-to-data">Editar meus dados</button><button type="button" class="btn" id="enviar">Confirmar e gerar Pix</button></div>
+<div class="step-actions step-actions-split"><button type="button" class="btn secondary-step" id="back-to-data">Editar meus dados</button><button type="button" class="btn" id="enviar">Confirmar e pagar</button></div>
 </section>
 </div>
 
@@ -83,12 +83,18 @@
 </div>
 <button type="button" class="btn" id="pix-novo" hidden>Fazer novo pedido</button>
 </div>
+<div class="pix" id="cartao-pagamento" hidden>
+<h3>Pague com cartão</h3>
+<p class="pix-ajuda">Os dados do cartão são protegidos pelo Mercado Pago.</p>
+<div id="cardPaymentBrick_container"></div>
+</div>
 </div></div></section>
 
 </main>
 <footer>© <span id="ano"></span> Bocadinho · Cookies artesanais<br><a href="https://instagram.com/bocadinh0" target="_blank" rel="noopener">@bocadinh0</a> · <a href="mailto:bocadinhocookie@gmail.com">bocadinhocookie@gmail.com</a> · <a href="https://wa.me/5521985929831" target="_blank" rel="noopener">WhatsApp (21) 98592-9831</a> · <a href="/privacidade.html">Política de Privacidade</a>
 <p class="credito">Site por <a href="https://www.instagram.com/wagnereduardodev/" target="_blank" rel="noopener nofollow">@wagnereduardodev</a> · <a href="https://github.com/eduardow890-droid/eduardow890-droid" target="_blank" rel="noopener nofollow">GitHub</a></p></footer>
 <a class="whatsapp-float" href="https://wa.me/5521985929831" target="_blank" rel="noopener" aria-label="Fale com a Bocadinho pelo WhatsApp"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2a10 10 0 0 0-8.6 15L2 22l5.1-1.3A10 10 0 1 0 12 2zm0 2a8 8 0 1 1-4.2 14.8l-.3-.2-3 .8.8-2.9-.2-.3A8 8 0 0 1 12 4zm-3 3.5c-.3 0-.7.2-.9.5-.4.5-.6 1-.4 1.9.3 1.2 1.4 2.8 3 4 1.6 1.1 2.9 1.5 3.9 1.3.7-.1 1.4-.8 1.5-1.4l.1-.6-1.8-.9-.7.9c-.9-.3-2-1.1-2.7-2.3l.6-.8-.8-1.8z"/></svg></a>
+<script src="https://sdk.mercadopago.com/js/v2"></script>
 <script src="app.js" defer></script>
 <script src="melhorias.js" defer></script>
 <script src="comum.js?v=1" defer></script>
