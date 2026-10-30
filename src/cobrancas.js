@@ -115,7 +115,7 @@ async function gerarParaPedido(pedidoId) {
     [Date.now(),pedidoId]);
     return { pronto: true, pagamento };
   } catch (e) {
-    const detalhe = e.detalhe?.cause || e.detalhe?.message || e.detalhe?.order_status_detail || '';
+    const detalhe = e.detalhe?.errors || e.detalhe?.cause || e.detalhe?.message || e.detalhe?.order_status_detail || '';
     await registrarFalha(pedidoId, Number(tentativa.tentativas), e).catch(err => {
       console.error('[cobranca] não foi possível agendar nova tentativa:', err.message);
     });

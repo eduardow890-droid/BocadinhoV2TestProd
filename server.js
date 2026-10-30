@@ -20,9 +20,11 @@ app.use(helmet({
     useDefaults: true,
     directives: {
       'img-src': ["'self'", 'data:', ...(origemImagensProdutos ? [origemImagensProdutos] : [])],
-      'script-src': ["'self'", 'https://sdk.mercadopago.com'],
-      'frame-src': ["'self'", 'https://*.mercadopago.com.br'],
-      'connect-src': ["'self'", 'https://api.mercadopago.com'],
+      // O MercadoPago.js injeta um pequeno bootstrap inline e usa o endpoint
+      // de telemetria do Mercado Libre durante a inicialização do Brick.
+      'script-src': ["'self'", "'unsafe-inline'", 'https://sdk.mercadopago.com'],
+      'frame-src': ["'self'", 'https://*.mercadopago.com.br', 'https://*.mercadolibre.com'],
+      'connect-src': ["'self'", 'https://api.mercadopago.com', 'https://api.mercadolibre.com'],
       // em desenvolvimento (http://localhost) não forçamos https
       'upgrade-insecure-requests': cfg.producao ? [] : null
     }

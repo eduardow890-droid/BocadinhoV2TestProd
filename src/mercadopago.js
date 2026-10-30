@@ -24,7 +24,9 @@ async function chamar(metodo, caminho, corpo, chaveIdempotencia) {
   });
   const json = await r.json().catch(() => ({}));
   if (!r.ok) {
-    const e = new Error(`Mercado Pago respondeu ${r.status}`);
+    const resumo = json?.errors?.map(x => x.code || x.message || x.type).filter(Boolean).join(', ')
+      || json?.error || json?.message || '';
+    const e = new Error(`Mercado Pago respondeu ${r.status}${resumo ? ` (${String(resumo).slice(0, 180)})` : ''}`);
     e.httpStatus = r.status;
     e.detalhe = json;
     throw e;
