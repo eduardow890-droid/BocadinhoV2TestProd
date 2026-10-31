@@ -372,13 +372,18 @@ async function inicializarCartao(d,tokenAcesso){
 		callbacks:{
 			onReady:()=>{},
 			onSubmit:async(formData,additionalData)=>{
+					const deviceId=window.MP_DEVICE_SESSION_ID||'';
 				const r=await fetch('/api/pedidos/'+encodeURIComponent(d.id)+'/cartao',{
-					method:'POST',headers:{'Content-Type':'application/json','x-order-access-token':tokenAcesso},
+						method:'POST',headers:{'Content-Type':'application/json','x-order-access-token':tokenAcesso,...(deviceId?{'x-meli-session-id':deviceId}:{})},
 					body:JSON.stringify({...formData,payment_type_id:additionalData?.paymentTypeId||'credit_card'})
 				});
 				const resposta=await r.json().catch(()=>({}));
 				if(!r.ok)throw new Error(resposta.erro||'Não foi possível processar o cartão.');
 				mostrarStatusPagamento(resposta,tokenAcesso);
+			},
+			onError:erro=>{
+				console.error('[cartao-brick]',erro);
+				$('cartao-erro').textContent='Não foi possível carregar o formulário de cartão. Confirme as credenciais públicas do Mercado Pago e tente novamente.';
 			}
 		}
 	});
@@ -388,9 +393,13 @@ function mostrarCartao(d,tokenAcesso){
 	pedidoAtual={id:d.id,token:tokenAcesso||lerPedidoSalvo()?.token,fim:Date.now()+d.restante_ms};
 	$('dados').hidden=true;$('cart-summary').hidden=true;$('checkout-progress').hidden=true;
 	$('pix').hidden=true;$('cartao-pagamento').hidden=false;
+	$('cartao-erro').textContent='';
 	$('pix-status').textContent='Aguardando pagamento';
 	$('pix-status-detail').textContent='Preencha os dados do cartão abaixo.';
-	inicializarCartao(d,tokenAcesso).catch(e=>{$('erro').textContent=e.message;});
+	inicializarCartao(d,tokenAcesso).catch(e=>{
+		console.error('[cartao-brick]',e);
+		$('cartao-erro').textContent='Não foi possível carregar o formulário de cartão. Confirme as credenciais públicas do Mercado Pago e tente novamente.';
+	});
 	$('cartao-pagamento').scrollIntoView({behavior:reduzirMovimento?'auto':'smooth',block:'center'});
 }
 

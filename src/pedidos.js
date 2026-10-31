@@ -84,6 +84,10 @@ async function criarPedido(d, expiraMin, tokenAcesso, cliente = null) {
 }
 
 async function obterPedido(id) { const r = await db.query('SELECT * FROM pedidos WHERE id=$1', [id]); return r.rows[0]; }
+async function obterItens(pedidoId) {
+  const r = await db.query('SELECT nome, qtd, preco_unit_centavos FROM pedido_itens WHERE pedido_id=$1 ORDER BY id', [pedidoId]);
+  return r.rows;
+}
 async function obterPagamento(pedidoId) { const r = await db.query('SELECT * FROM pagamentos WHERE pedido_id=$1', [pedidoId]); return r.rows[0]; }
 
 async function visaoPublica(pedido) {
@@ -109,4 +113,4 @@ async function mudarStatus(pedidoId, de, para) {
   return r.rowCount === 1;
 }
 
-module.exports = { ErroNegocio, criarPedido, obterPedido, obterPagamento, visaoPublica, marcarPago, mudarStatus };
+module.exports = { ErroNegocio, criarPedido, obterPedido, obterItens, obterPagamento, visaoPublica, marcarPago, mudarStatus };

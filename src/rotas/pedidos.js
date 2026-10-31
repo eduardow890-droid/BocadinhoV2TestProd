@@ -46,7 +46,9 @@ router.post('/pedidos', limiteCriar, clientes.carregarCliente, async (req, res, 
   }
 
   try {
-    if (r.data.metodoPagamento === 'pix') await cobrancas.gerarParaPedido(pedido.id);
+    if (r.data.metodoPagamento === 'pix') {
+      await cobrancas.gerarParaPedido(pedido.id, req.get('x-meli-session-id') || '');
+    }
   } catch (e) {
     console.error(`[pix] tentativa agendada para pedido ${pedido.id.slice(0, 8)} (HTTP ${e.httpStatus || 'indisponível'}).`);
   }
@@ -75,6 +77,7 @@ router.post('/pedidos/:id/cartao', limiteCartao, async (req, res, next) => {
     if (Number(pedido.expira_em) <= Date.now()) return res.status(409).json({ erro: 'Este pedido expirou. Faça um novo pedido.' });
 
     const dados = req.body || {};
+    const deviceId = req.get('x-meli-session-id') || '';
     if (!/^[a-z0-9_-]{1,40}$/i.test(String(dados.payment_method_id || '')) ||
         !/^[a-z0-9_-]{20,200}$/i.test(String(dados.token || '')) ||
         !Number.isInteger(Number(dados.installments)) || Number(dados.installments) < 1 || Number(dados.installments) > 24) {
@@ -86,8 +89,10 @@ router.post('/pedidos/:id/cartao', limiteCartao, async (req, res, next) => {
 
     const order = await mp.criarCartao({
       pedido,
-      cliente: { email: pedido.email },
+      cliente: { email: pedido.email, nome: pedido.nome },
+      itens: await svc.obterItens(pedido.id),
       dados,
+      deviceId,
       // O mesmo token pode ser reenviado com segurança; um cartão diferente
       // recebe outra chave e pode ser tentado após uma recusa.
       chaveIdempotencia: `${pedido.id}-cartao-${crypto.createHash('sha256').update(String(dados.token)).digest('hex').slice(0, 24)}`

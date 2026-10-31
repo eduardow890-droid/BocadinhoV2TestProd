@@ -62,6 +62,8 @@ Status: `pendente → pago → em_preparo → enviado → concluido` (mais `expi
 1. Node 18+ instalado localmente. Em produção, prefira Node 22 LTS ou superior. Na pasta: `npm install`
 2. `cp .env.example .env` e preencha:
    - `MP_ACCESS_TOKEN`: em Mercado Pago > Suas integrações > sua aplicação (comece pelas credenciais de **teste**).
+   - `MP_PUBLIC_KEY`: chave pública da mesma aplicação/ambiente, usada pelo formulário de cartão no navegador.
+   - `MP_STATEMENT_DESCRIPTOR`: nome opcional exibido no extrato do cartão; o padrão é `BOCADINHO`.
    - `ADMIN_TOKEN`: gere algo longo e aleatório.
 3. Configure o PostgreSQL do Supabase em `DATABASE_URL` e exponha o servidor com HTTPS para o webhook, por exemplo `ngrok http 3000`, colocando a URL em `BASE_URL`.
 4. No painel do Mercado Pago > Webhooks: informe `BASE_URL/api/webhook/mercadopago`, marque o evento **Order (Mercado Pago)**, copie a **chave secreta** para `MP_WEBHOOK_SECRET`.

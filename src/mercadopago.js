@@ -11,13 +11,14 @@ function chaveCancelamento(orderId) {
   return `${hex.slice(0,8)}-${hex.slice(8,12)}-${hex.slice(12,16)}-${hex.slice(16,20)}-${hex.slice(20)}`;
 }
 
-async function chamar(metodo, caminho, corpo, chaveIdempotencia) {
+async function chamar(metodo, caminho, corpo, chaveIdempotencia, cabecalhos = {}) {
   const r = await fetch(API + caminho, {
     method: metodo,
     headers: {
       Authorization: `Bearer ${cfg.mpToken}`,
       'Content-Type': 'application/json',
-      ...(chaveIdempotencia ? { 'X-Idempotency-Key': chaveIdempotencia } : {})
+      ...(chaveIdempotencia ? { 'X-Idempotency-Key': chaveIdempotencia } : {}),
+      ...cabecalhos
     },
     body: corpo ? JSON.stringify(corpo) : undefined,
     signal: AbortSignal.timeout(15000)
@@ -34,8 +35,16 @@ async function chamar(metodo, caminho, corpo, chaveIdempotencia) {
   return json;
 }
 
+function itensDaOrder(itens = []) {
+  return itens.map(item => ({
+    title: item.nome,
+    quantity: Number(item.qtd),
+    unit_price: (Number(item.preco_unit_centavos) / 100).toFixed(2)
+  }));
+}
+
 /** Cria uma order Pix pelo fluxo de sandbox da Orders API. */
-async function criarPix({ pedido, cliente, chaveIdempotencia = pedido.id }) {
+async function criarPix({ pedido, cliente, itens, deviceId, chaveIdempotencia = pedido.id }) {
   // No sandbox do Pix, APRO é o valor oficial que faz a order ser aprovada
   // automaticamente. Em produção, usamos os dados reais do comprador.
   const teste = !cfg.producao;
@@ -54,8 +63,9 @@ async function criarPix({ pedido, cliente, chaveIdempotencia = pedido.id }) {
       email: teste ? 'test_user_br@testuser.com' : cliente.email,
       first_name: teste ? 'APRO' : cliente.nome.split(' ')[0]
     },
+    items: itensDaOrder(itens),
     transactions: { payments: [pagamento] },
-  }, chaveIdempotencia); // chave persistida antes da chamada; toda repetição recupera a mesma cobrança
+  }, chaveIdempotencia, deviceId ? { 'X-meli-session-id': deviceId } : {}); // chave persistida antes da chamada; toda repetição recupera a mesma cobrança
 
   const p = o.transactions?.payments?.[0] || o.transaction?.payments?.[0];
   const t = p?.payment_method || {};
@@ -78,7 +88,7 @@ async function criarPix({ pedido, cliente, chaveIdempotencia = pedido.id }) {
 }
 
 /** Cria e processa uma order de cartão com o token gerado pelo MercadoPago.js. */
-async function criarCartao({ pedido, cliente, dados, chaveIdempotencia }) {
+async function criarCartao({ pedido, cliente, itens, dados, deviceId, chaveIdempotencia }) {
   const tipo = dados.payment_type_id === 'debit_card' ? 'debit_card' : 'credit_card';
   const amount = (pedido.total_centavos / 100).toFixed(2);
   return chamar('POST', '/v1/orders', {
@@ -90,6 +100,7 @@ async function criarCartao({ pedido, cliente, dados, chaveIdempotencia }) {
       email: cliente.email,
       identification: dados.payer?.identification
     },
+    items: itensDaOrder(itens),
     transactions: {
       payments: [{
         amount,
@@ -97,11 +108,12 @@ async function criarCartao({ pedido, cliente, dados, chaveIdempotencia }) {
           id: dados.payment_method_id,
           type: tipo,
           token: dados.token,
-          installments: Number(dados.installments) || 1
+          installments: Number(dados.installments) || 1,
+          statement_descriptor: cfg.mpStatementDescriptor
         }
       }]
     }
-  }, chaveIdempotencia);
+  }, chaveIdempotencia, deviceId ? { 'X-meli-session-id': deviceId } : {});
 }
 
 const consultarOrder = id => chamar('GET', `/v1/orders/${encodeURIComponent(id)}`);

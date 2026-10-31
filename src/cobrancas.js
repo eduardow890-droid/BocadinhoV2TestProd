@@ -26,7 +26,7 @@ async function registrarFalha(pedidoId, tentativas, erro) {
   [Date.now() + atraso, String(erro.message || 'Falha ao gerar Pix').slice(0, 240), Date.now(), pedidoId]);
 }
 
-async function gerarParaPedido(pedidoId) {
+async function gerarParaPedido(pedidoId, deviceId = '') {
   const agora = Date.now();
   const estadoInicial = await svc.obterPedido(pedidoId);
   if (!estadoInicial) return { pronto: false, em_processamento: false };
@@ -83,6 +83,8 @@ async function gerarParaPedido(pedidoId) {
         : await mp.criarPix({
             pedido,
             cliente: { email: pedido.email, nome: pedido.nome },
+            itens: await svc.obterItens(pedido.id),
+            deviceId,
             chaveIdempotencia: tentativa.chave_idempotencia
           });
 
