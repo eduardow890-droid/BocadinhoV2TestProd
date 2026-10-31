@@ -448,6 +448,7 @@ function mostrarPix(d,tokenAcesso){
 function iniciarRelogio(){
 	clearInterval(timerRelogio);
 	const atualizar=()=>{
+		if(!pedidoAtual){clearInterval(timerRelogio);return;}
 		const s=Math.max(0,Math.floor((pedidoAtual.fim-Date.now())/1000));
 		$('pix-tempo').textContent='Este Pix expira em '+String(Math.floor(s/60)).padStart(2,'0')+':'+String(s%60).padStart(2,'0');
 	};
@@ -528,6 +529,7 @@ async function cancelarPedido(){
 		$('pix-cancelar').hidden=true;
 		$('pix-novo').hidden=false;
 		clearInterval(timerPoll);
+		clearInterval(timerRelogio);
 		try{localStorage.removeItem(CHAVE)}catch(e){}
 	}catch(e){
 		$('pix-status').textContent=e.message;
@@ -549,6 +551,8 @@ $('pix-novo').addEventListener('click',()=>{
 	PRODUTOS.forEach(p=>{q[p.id]=0});
 	totalExibido=0;
 	pedidoAtual=null;
+	clearInterval(timerPoll);
+	clearInterval(timerRelogio);
 	$('pix').hidden=true;
 	$('dados').hidden=false;
 	$('cart-summary').hidden=false;

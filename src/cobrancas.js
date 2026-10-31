@@ -119,7 +119,8 @@ async function gerarParaPedido(pedidoId) {
     await registrarFalha(pedidoId, Number(tentativa.tentativas), e).catch(err => {
       console.error('[cobranca] não foi possível agendar nova tentativa:', err.message);
     });
-    console.error(`[cobranca] pedido ${pedidoId.slice(0, 8)}: ${e.message}${detalhe ? ` — ${String(detalhe).slice(0, 180)}` : ''}`);
+    const detalheTexto = typeof detalhe === 'string' ? detalhe : JSON.stringify(detalhe);
+    console.error(`[cobranca] pedido ${pedidoId.slice(0, 8)}: ${e.message}${detalheTexto ? ` — ${detalheTexto.slice(0, 500)}` : ''}`);
     throw e;
   }
 }
